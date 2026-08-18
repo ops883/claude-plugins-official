@@ -1,6 +1,17 @@
 name: Bump Plugin SHAs
 
-# Nightly sweep: for each external entry whose upstream HEAD has moved past
+# Fork note: this repository is a fork of anthropics/claude-plugins-official.
+# Upstream runs this sweep nightly to maintain the official directory's SHA
+# pins. That schedule is disabled here: the sweep re-pins third-party plugins
+# this fork does not own, and it cannot finish anyway — opening a bump PR needs
+# "Allow GitHub Actions to create and approve pull requests" (Settings ->
+# Actions -> General -> Workflow permissions), which is on upstream but off on
+# this fork. Each scheduled run therefore burned ~3 minutes, failed on its first
+# createPullRequest call, and left an orphan bump/<slug> branch behind.
+# workflow_dispatch is retained so the sweep can still be run deliberately --
+# enable that setting first, or the same failure recurs.
+#
+# Sweep behaviour: for each external entry whose upstream HEAD has moved past
 # its pinned SHA, validate at the new SHA with `claude plugin validate`
 # inline, then open one PR per bumped plugin on branch `bump/<slug>`.
 # Failing entries stay isolated in their own PR; passing bumps merge
@@ -22,8 +33,6 @@ name: Bump Plugin SHAs
 # re-dispatches don't pile up duplicate work.
 
 on:
-  schedule:
-    - cron: '23 7 * * *'  # Daily 07:23 UTC
   workflow_dispatch:
     inputs:
       max_bumps:
